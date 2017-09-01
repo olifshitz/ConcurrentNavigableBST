@@ -400,12 +400,13 @@ public class FunctionalityTests {
         reallyAssert(s instanceof BLTreeMap);
         timer.start("Range test (iterator)  ", size);
         int sum = 0;
-        BLTreeMap blTree = (BLTreeMap)s;
+        BLTreeMap tree = (BLTreeMap)s;
         Arrays.sort(key);
-        Collection<Integer> values = blTree.values(key[0], key[size -1]);
-        for (Iterator it = values.iterator(); it.hasNext(); ) {
-            it.next();
-            sum++;
+        Set<Integer> entries = tree.keySet(key[0], key[size -1]);
+        for (Iterator it = entries.iterator(); it.hasNext(); ) {
+            Object entry = it.next();
+            if(tree.get(entry) != null)
+                sum++;
         }
         
         reallyAssert(sum == size);
