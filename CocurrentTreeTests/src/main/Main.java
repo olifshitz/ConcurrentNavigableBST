@@ -742,12 +742,11 @@ public class Main {
     
     @Exclude
     protected static final class Ratio {
-        final double del, ins, range;
-        public Ratio(final double ins, final double del, final double range) {
-            if (ins < 0 || del < 0 || range < 0 || ins+del+range > 1) throw new RuntimeException("invalid ratio " + ins + "i-" + del + "d");
+        final double del, ins;
+        public Ratio(final double ins, final double del) {
+            if (ins < 0 || del < 0 || ins+del > 1) throw new RuntimeException("invalid ratio " + ins + "i-" + del + "d");
             this.del = del;
             this.ins = ins;
-            this.range = range;
         }
         @Override
         public String toString() { return "" + (int)(100*ins) + "i-" + (int)(100*del) + "d"; }
@@ -833,10 +832,8 @@ public class Main {
 
         // deal with an all-search workload by prefilling 50% insert, 50% delete
         // and normalize other ratios to have 100% updates.
-        if (Math.abs(ratio.ins + ratio.del) < 1e-8) ratio = new Ratio(0.5, 0.5, 0);
-        else ratio = new Ratio(ratio.ins / (ratio.ins+ratio.del+ratio.range),
-                               ratio.del / (ratio.ins+ratio.del+ratio.range),
-                               ratio.range / (ratio.ins+ratio.del+ratio.range));
+        if (Math.abs(ratio.ins + ratio.del) < 1e-8) ratio = new Ratio(0.5, 0.5);
+        else ratio = new Ratio(ratio.ins / (ratio.ins+ratio.del), ratio.del / (ratio.ins+ratio.del));
         
         final int MAX_REPS = 200;
         final double THRESHOLD_PERCENT = 5; // must be within THRESHOLD_PERCENT percent of expected size to stop
@@ -1173,7 +1170,7 @@ public class Main {
         }
 
         (new Main(nthreads, ntrials, nseconds, filename,
-                new Ratio(switches.get("ratio-ins") / 100., switches.get("ratio-del") / 100., switches.get("ratio-range") / 100.),
+                new Ratio(switches.get("ratio-ins") / 100., switches.get("ratio-del") / 100.),//, switches.get("ratio-rq") / 100., switches.get("ratio-snap") / 100.),
                 alg, switches, prefill, treeParam)).run(output);
     }
 
