@@ -247,6 +247,7 @@ public class Main {
     protected double nseconds;
     protected String filename;
     protected Ratio ratio;
+    private final double rangePart;
     protected String alg;
     protected SwitchMap switches;
     protected boolean prefill;
@@ -257,12 +258,13 @@ public class Main {
     protected AtomicLong startWallTime = new AtomicLong(0);
     
     public Main(int nthreads, int ntrials, double nseconds, String filename,
-            Ratio ratio, String alg, SwitchMap switches, boolean prefill, Object treeParam) {
+            Ratio ratio, double rangePart, String alg, SwitchMap switches, boolean prefill, Object treeParam) {
         this.nthreads = nthreads;
         this.ntrials = ntrials;
         this.nseconds = nseconds;
         this.filename = filename;
         this.ratio = ratio;
+        this.rangePart = rangePart;
         this.alg = alg;
         this.switches = switches;
         this.prefill = prefill;
@@ -472,6 +474,13 @@ public class Main {
                     if (tree.remove(key, rng)) trueDel++;
                     else falseDel++;
                 } else {
+                    final double getType = rng.nextNatural() / (double) Integer.MAX_VALUE;
+                    if(getType < rangePart) {
+                        final K key2 = (K) gen.next();
+                        tree.rangeQuery(min(key, key2), max(key, key2), falseIns, rng);
+                        trueRQ++;
+                        continue;
+                    }
                     if (tree.contains(key)) trueFind++;
                     else falseFind++;
                 }
@@ -481,6 +490,18 @@ public class Main {
             wallTime = System.nanoTime();
             userTime = bean.getThreadUserTime(id);
             cpuTime = bean.getThreadCpuTime(id);
+        }
+        
+        public K min(K key1, K key2)
+        {
+            if(key1.compareTo(key2) > 0) return key2;
+            return key1;
+        }
+        
+        public K max(K key1, K key2)
+        {
+            if(key1.compareTo(key2) > 0) return key1;
+            return key2;
         }
 
         public int getOpCount() { return 0; }
@@ -1062,6 +1083,7 @@ public class Main {
         switches.put("seed", (double) Globals.DEFAULT_SEED);
         switches.put("generator", (double) Globals.GENERATOR_TYPE_DEFAULT);
         switches.put("keyRange", (double) Globals.DEFAULT_KEYRANGE);
+        switches.put("ratio-range", (double) Globals.DEFAULT_RATION_RANGE);
         
         try {
             nthreads = Integer.parseInt(args[0]);
@@ -1126,6 +1148,17 @@ public class Main {
                         System.out.println("The delete percentage must be a 32-bit integer.");
                         System.exit(-1);
                     }
+                } else if (args[i].matches("-range[0-9]+(\\.[0-9]+){0,1}")) {
+                    try {
+                        switches.put("ratio-range", Double.parseDouble(args[i].substring(4, args[i].length())));
+                        if (switches.get("ratio-range") < 0) {
+                            System.out.println("The range percentage must be >= 0");
+                            System.exit(-1);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("The range percentage must be a 32-bit integer.");
+                        System.exit(-1);
+                    }
                 } else if (args[i].matches("-keys[0-9]+")) {
                     try {
                         switches.put("keyRange", (double) Integer.parseInt(args[i].substring(5, args[i].length())));
@@ -1170,8 +1203,8 @@ public class Main {
         }
 
         (new Main(nthreads, ntrials, nseconds, filename,
-                new Ratio(switches.get("ratio-ins") / 100., switches.get("ratio-del") / 100.),//, switches.get("ratio-rq") / 100., switches.get("ratio-snap") / 100.),
-                alg, switches, prefill, treeParam)).run(output);
+                new Ratio(switches.get("ratio-ins") / 100., switches.get("ratio-del") / 100.),
+                switches.get("ratio-range") / 100., alg, switches, prefill, treeParam)).run(output);
     }
 
     public static void main(String[] args) throws Exception {
