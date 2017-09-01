@@ -1150,7 +1150,7 @@ public class Main {
                     }
                 } else if (args[i].matches("-range[0-9]+(\\.[0-9]+){0,1}")) {
                     try {
-                        switches.put("ratio-range", Double.parseDouble(args[i].substring(4, args[i].length())));
+                        switches.put("ratio-range", Double.parseDouble(args[i].substring(6, args[i].length())));
                         if (switches.get("ratio-range") < 0) {
                             System.out.println("The range percentage must be >= 0");
                             System.exit(-1);
