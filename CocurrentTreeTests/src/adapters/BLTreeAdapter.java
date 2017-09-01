@@ -32,14 +32,11 @@ public class BLTreeAdapter<K extends Comparable<K>> extends AbstractAdapter<K> i
 
     @Override
     public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
-        assert rangeSize == Globals.DEFAULT_RQ_SIZE;
-        final Object[] result = new Object[rangeSize];        
-        final Iterator<K> it = tree.keySet(lo, hi).iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            result[i++] = it.next();
-        }
-        return result;
+        Iterator<K> iter = tree.keySet(lo, hi).iterator();
+        ArrayList<K> copy = new ArrayList<>();
+        while (iter.hasNext())
+            copy.add(iter.next());
+        return copy;
     }
 
     @Override
