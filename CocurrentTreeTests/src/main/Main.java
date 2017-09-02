@@ -380,6 +380,8 @@ public class Main {
         public abstract int getFalseDel();
         public abstract int getTrueFind();
         public abstract int getFalseFind();
+        public abstract int getTrueFindValue();
+        public abstract int getFalseFindValue();
         public abstract int getTrueRQ();
         public abstract int getFalseRQ();
         public abstract int getTrueSnap();
@@ -400,7 +402,7 @@ public class Main {
         CyclicBarrier start;
         Generator<Integer> gen;
         AbstractAdapter<K> tree;
-        int trueDel, falseDel, trueIns, falseIns, trueFind, falseFind, countRQ, sumRQ, trueSnap, falseSnap;
+        int trueDel, falseDel, trueIns, falseIns, trueFind, falseFind, trueFindVal, falseFindVal, countRQ, sumRQ, trueSnap, falseSnap;
         final Experiment ex;
         Random rng;
 
@@ -512,6 +514,8 @@ public class Main {
         public int getFalseDel() { return falseDel; }
         public int getTrueFind() { return trueFind; }
         public int getFalseFind() { return falseFind; }
+        public int getTrueFindValue() { return trueFindVal; }
+        public int getFalseFindValue() { return falseFindVal; }
         public int getTrueRQ() { return countRQ; }
         public int getFalseRQ() { return sumRQ; }
         public int getTrueSnap() { return trueSnap; }
@@ -626,7 +630,7 @@ public class Main {
             
             double elapsed = (localEndTime - localStartTime)/1e9;
             out.print(prefix + ",");
-            long ntruerq = 0, nfalserq = 0, ntruesnap = 0, nfalsesnap = 0, ntrueins = 0, nfalseins = 0, ntruedel = 0, nfalsedel = 0, ntruefind = 0, nfalsefind = 0;
+            long ntruerq = 0, nfalserq = 0, ntruesnap = 0, nfalsesnap = 0, ntrueins = 0, nfalseins = 0, ntruedel = 0, nfalsedel = 0, ntruefind = 0, nfalsefind = 0, ntruefindval = 0, nfalsefindval = 0;
             for (Worker w : workers) {
                 ntrueins += w.getTrueIns();
                 nfalseins += w.getFalseIns();
@@ -634,6 +638,8 @@ public class Main {
                 nfalsedel += w.getFalseDel();
                 ntruefind += w.getTrueFind();
                 nfalsefind += w.getFalseFind();
+                ntruefindval += w.getTrueFindValue();
+                nfalsefindval += w.getFalseFindValue();
                 ntruerq += w.getTrueRQ();
                 nfalserq += w.getFalseRQ();
                 ntruesnap += w.getTrueSnap();
@@ -648,13 +654,13 @@ public class Main {
                     averageDepth = (depthSum / nnodes);
                 } // otherwise, we don't know what methods it has!
             }
-            long ntrue = ntrueins+ntruedel+ntruefind+ntruerq+ntruesnap, nfalse = nfalseins+nfalsedel+nfalsefind+nfalserq+nfalsesnap;
+            long ntrue = ntrueins+ntruedel+ntruefind+ntruefindval+ntruerq+ntruesnap, nfalse = nfalseins+nfalsedel+nfalsefind+nfalsefindval;
             long nops = ntrue+nfalse;
             ex.throughput = (int)(nops/(double)elapsed);
             out.print(ex.nprocs + "," + nops + "," + ex.maxkey + ",");
             out.print(ex.ratio + ",");
             out.print(rng.nextInt() + "," + elapsed + ",");
-            out.print(ntrueins + "," + nfalseins + "," + ntruedel + "," + nfalsedel + "," + ntruefind + "," + nfalsefind
+            out.print(ntrueins + "," + nfalseins + "," + ntruedel + "," + nfalsedel + "," + ntruefind + "," + nfalsefind+ "," + ntruefindval + "," + nfalsefindval
                     + "," + ntruerq + "," + nfalserq + "," + ntruesnap + "," + nfalsesnap + "," + (-1) + "," + (-1)
                     + "," + ex.throughput + ",");
             out.print(averageDepth + ",");
@@ -687,7 +693,7 @@ public class Main {
             // operations per thread (HARD LIMIT OF 128 FOR THESE VALUES; VALUES FOR HIGHER THREAD COUNTS WILL NOT BE PRINTED)
             for (Worker w : workers) {
                 long ops = w.getTrueIns() + w.getFalseIns() + w.getTrueDel() + w.getFalseDel() + w.getTrueFind() +
-                        w.getFalseFind() + w.getTrueRQ() + w.getFalseRQ() + w.getTrueSnap() + w.getFalseSnap();
+                        w.getFalseFind() + w.getTrueFindValue()+ w.getFalseFindValue()+ w.getTrueRQ() + w.getFalseRQ() + w.getTrueSnap() + w.getFalseSnap();
                 out.print(","+ops);
             }
             for (int i=workers.size();i<128;i++) out.print(",");
@@ -966,6 +972,8 @@ public class Main {
                 + ",ndelfalse"
                 + ",nfindtrue"
                 + ",nfindfalse"
+                + ",nfindvaluetrue"
+                + ",nfindvaluefalse"
                 + ",nrqtrue"
                 + ",nrqfalse"
                 + ",nsnaptrue"
