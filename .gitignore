@@ -1,5 +1,4 @@
 /CocurrentTreeTests/build
 /CocurrentTreeTests/dist
 /CocurrentTreeTests/nbproject/private
-/results.csv
-/results.csv_stdout
+/results/*.csv_stdout

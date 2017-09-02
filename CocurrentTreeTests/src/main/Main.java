@@ -25,6 +25,7 @@ import adapters.*;
 import main.support.*;
 import java.io.*;
 import java.lang.management.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -932,12 +933,17 @@ public class Main {
     }
     
     public void run(final PrintStream output) {
+        // retrieve list of experiments to perform (this is a method because subclasses can implement it differently)
+        ArrayList<Experiment> exp = getExperiments();
+        
         // create output streams
         PrintStream out = output;
         if (out == null) {
             if (filename == null) {
                 out = System.out;
             } else {
+                filename = Paths.get(filename, exp.get(0).toString()).toString() + ".csv";
+                System.out.println("Results printed to " + filename);
                 try { out = new PrintStream(new File(filename)); }
                 catch (Exception e) { e.printStackTrace(); System.exit(-1); }
             }
@@ -994,9 +1000,6 @@ public class Main {
         out.print(",restarted");
         out.println();
         
-        // retrieve list of experiments to perform (this is a method because subclasses can implement it differently)
-        ArrayList<Experiment> exp = getExperiments();
-
         // preview experiments, and determine now many runs there will be in total
         for (Experiment ex : exp) {
             System.out.println(ex);
