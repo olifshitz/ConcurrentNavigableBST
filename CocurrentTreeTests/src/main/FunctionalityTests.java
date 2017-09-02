@@ -4,6 +4,7 @@ import algorithms.bltree.BLTreeMap;
 import java.util.*;
 import java.io.*;
 
+
 public class FunctionalityTests {
     static int absentSize;
     static int absentMask;
@@ -395,6 +396,22 @@ public class FunctionalityTests {
         reallyAssert (s.equals(m));
     }
 
+    static void rangeTest(Map<Integer,Integer> s, int size, Integer[] key){
+        reallyAssert(s instanceof BLTreeMap);
+        timer.start("Range test (iterator)  ", size);
+        int sum = 0;
+        BLTreeMap tree = (BLTreeMap)s;
+        Arrays.sort(key);
+        Set<Integer> entries = tree.keySet(key[0], key[size -1]);
+        for (Iterator it = entries.iterator(); it.hasNext(); ) {
+            Object entry = it.next();
+            if(tree.get(entry) != null)
+                sum++;
+        }
+        
+        reallyAssert(sum == size);
+        timer.finish();
+    }
 
     static void test(Map<Integer,Integer> s, Integer[] key) {
         int size = key.length;
@@ -513,6 +530,15 @@ public class FunctionalityTests {
         s.clear();
         s2.clear();
         timer.finish();
+        
+        t3("Put (absent)           ", size, s, key, size);
+        rangeTest(s,size,key);
+        
+        timer.start("Clear                  ", size);
+        s.clear();
+        s2.clear();
+        timer.finish();
+        
         reallyAssert (s2.isEmpty() && s.isEmpty());
     }
 
