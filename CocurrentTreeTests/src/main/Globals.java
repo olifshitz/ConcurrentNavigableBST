@@ -29,6 +29,7 @@ import org.deuce.transform.Exclude;
 public class Globals {
     public static final int DEFAULT_SEED = 581968107;//11720571;
     public static final int DEFAULT_KEYRANGE = 1000000;
+    public static final int DEFAULT_RATION_RANGE = 0;
 
     public static final int DEFAULT_CHAIN_SIZE = 1000;
     public static final int DEFAULT_RQ_SIZE = 100;
