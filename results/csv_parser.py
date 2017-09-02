@@ -30,7 +30,7 @@ def parse_dir(output_file, dir):
                 results[threads] = dict()
             results[threads][name] = avg
     with open(output_file, 'w') as csvfile:
-        fieldnames = ['threads', 'BLTree', 'ConcurrentHMAP', 'BST', 'AVL', 'Snap', 'SkipList']
+        fieldnames = ['threads', 'BLTree', 'ConcurrentHMAP', 'BST', 'AVL', 'Snap', 'SkipList', 'SyncTMAP']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for name in results:
