@@ -251,14 +251,13 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
 
     private Set<Map.Entry<K, V>> entrySet(K min, K max, boolean allTree) {
         Set<Map.Entry<K,V>> result = new HashSet<>();
-
-        while(!this.root.setChangingRange(min, max, allTree)){}
-        try {
-            this.root.addRangeToSet(min, max, result, allTree, false);
-            return result;
-        } finally {
-            this.root.unsetChangingRange(min, max, allTree);
+        Iterator<Map.Entry<K,V>> it = entryIterator(min, max, allTree);
+        while(it.hasNext()){
+            Map.Entry<K,V> entry = it.next();
+            result.add(new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()));
         }
+        
+        return result;
     }
     
     public Iterator<Map.Entry<K, V>> entryIterator() {
@@ -291,6 +290,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             this.max = max;
             this.allTree = allTree;
             nodeStack = new Stack<>();
+            if(allTree) root.unsetChanging();
             nodeStack.push(root.getChild(root.getDirection(min)));
             moveNext();
         }
@@ -335,10 +335,9 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             moveNext();
             return result;
         }
-
     }
 
-	private class TreeNodeValue {
+    private class TreeNodeValue {
         public boolean foundExactly;
         public V value;
     };
