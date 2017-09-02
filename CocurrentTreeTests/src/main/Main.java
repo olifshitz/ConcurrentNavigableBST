@@ -285,23 +285,31 @@ public class Main {
         final Random rng;
         public Generator(final Random rng) { this.rng = rng; }
         public abstract K next();
+        public abstract K rangeTop(K rangeBottom);
     }
 
     @Exclude
     public final class RandomGenerator extends Generator<Integer> {
         final int maxKey;
         final int id, numberOfIds;
+        private final int rangeSize;
 
-        public RandomGenerator(final int id, final int numberOfIds, final Random rng, final int maxKey) {
+        public RandomGenerator(final int id, final int numberOfIds, final Random rng, final int maxKey, final int rangeSize) {
             super(rng);
             if (maxKey < 0) throw new RuntimeException("maxKey must be > 0");
             this.maxKey = maxKey;
             this.id = id;
             this.numberOfIds = numberOfIds;
+            this.rangeSize = rangeSize;
         }
 
         public Integer next() {
             return rng.nextNatural(maxKey)+1;
+        }
+
+        @Override
+        public Integer rangeTop(Integer rangeBottom) {
+            return rangeBottom + rangeSize;
         }
     }
 
@@ -314,13 +322,15 @@ public class Main {
         int chainSize;
         final static int LEFT = -1, RIGHT = 1;
         int rand = -1, last = -1, dir = RIGHT, cnt = 0;
+        private final int rangeSize;
 
-        public LeftRightChainGenerator(final int id, final int chainSize, final Random rng, final int maxKey) {
+        public LeftRightChainGenerator(final int id, final int chainSize, final Random rng, final int maxKey, final int rangeSize) {
             super(rng);
             if (maxKey < 1) throw new RuntimeException("maxKey must be >= 1 so that each process is guaranteed a key.");
             this.originalChainSize = chainSize;
             this.maxKey = maxKey;
             this.id = id;
+            this.rangeSize = rangeSize;
         }
 
         public Integer next() {
@@ -337,6 +347,11 @@ public class Main {
             cnt = (cnt + SCALE) % (chainSize*SCALE);
             return (rand + (dir == LEFT ? -cnt : cnt) + maxKey) % maxKey;
         }
+        
+        @Override
+        public Integer rangeTop(Integer rangeBottom) {
+            return rangeBottom + rangeSize;
+        }
     }
         
     @Exclude
@@ -350,7 +365,7 @@ public class Main {
         ArrayList<Generator> getGenerators(Experiment ex, java.util.Random rng) {
             ArrayList<Generator> arrays = new ArrayList<Generator>(ex.nprocs);
             for (int i=0;i<ex.nprocs;i++) {
-                arrays.add(new RandomGenerator(i, ex.nprocs, new Random(rng.nextInt()), ex.maxkey));
+                arrays.add(new RandomGenerator(i, ex.nprocs, new Random(rng.nextInt()), ex.maxkey, ex.rangeSize));
             }
             return arrays;
         }
@@ -364,7 +379,7 @@ public class Main {
         ArrayList<Generator> getGenerators(Experiment ex, java.util.Random rng) {
             ArrayList<Generator> arrays = new ArrayList<Generator>(ex.nprocs);
             for (int i=0;i<ex.nprocs;i++) {
-                arrays.add(new LeftRightChainGenerator(i, chainSize, new Random(rng.nextInt()), ex.maxkey));
+                arrays.add(new LeftRightChainGenerator(i, chainSize, new Random(rng.nextInt()), ex.maxkey, ex.rangeSize));
             }
             return arrays;
         }
@@ -479,8 +494,8 @@ public class Main {
                 } else {
                     final double getType = rng.nextNatural() / (double) Integer.MAX_VALUE;
                     if(getType < rangePart) {
-                        final K key2 = gen.next();
-                        sumRQ += tree.rangeQuery(min(key, key2), max(key, key2), falseIns, rng);
+                        final K top = gen.rangeTop(key);
+                        sumRQ += tree.rangeQuery(min(key, top), max(key, top), falseIns, rng);
                         countRQ++;
                         continue;
                     }
@@ -788,16 +803,18 @@ public class Main {
         double totalThreadTime;
         final String alg, param;
         final int nprocs, maxkey;
+        private final int rangeSize;
         final Ratio ratio;
         final double rangePart;
         final GeneratorFactory factory;
         int throughput; // exists to make access to this convenient so that we can decide whether we have finished warming up
 
-        public Experiment(final String alg, final String param, final int nprocs, final int maxkey, final Ratio ratio, final double rangePart, final GeneratorFactory factory) {
+        public Experiment(final String alg, final String param, final int nprocs, final int maxkey, final int rangeSize, final Ratio ratio, final double rangePart, final GeneratorFactory factory) {
             this.alg = alg;
             this.param = param;
             this.nprocs = nprocs;
             this.maxkey = maxkey;
+            this.rangeSize = rangeSize;
             this.ratio = ratio;
             this.rangePart = rangePart;
             this.factory = factory;
@@ -934,7 +951,7 @@ public class Main {
             System.out.println("Critical error with generator selection...");
             System.exit(-1);
         }
-        exp.add(new Experiment(alg, treeParam.toString(), nthreads, (int) switches.get("keyRange"), ratio, rangePart, gen));
+        exp.add(new Experiment(alg, treeParam.toString(), nthreads, (int) switches.get("keyRange"), (int) switches.get("rangeSize"), ratio, rangePart, gen));
         return exp;
     }
     
@@ -1177,6 +1194,17 @@ public class Main {
                         switches.put("keyRange", (double) Integer.parseInt(args[i].substring(5, args[i].length())));
                         if (switches.get("keyRange") < 1) {
                             System.out.println("The key range must be > 0");
+                            System.exit(-1);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("The key range must be a 32-bit integer.");
+                        System.exit(-1);
+                    }
+                } else if (args[i].matches("-range-size[0-9]+")) {
+                    try {
+                        switches.put("rangeSize", (double) Integer.parseInt(args[i].substring(11, args[i].length())));
+                        if (switches.get("rangeSize") < 1) {
+                            System.out.println("The range size must be > 0");
                             System.exit(-1);
                         }
                     } catch (Exception ex) {
