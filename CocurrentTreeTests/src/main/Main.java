@@ -400,7 +400,7 @@ public class Main {
     public class TimedWorker<K extends Comparable<? super K>> extends Worker<K> {
         public final long WORK_TIME;
         CyclicBarrier start;
-        Generator<Integer> gen;
+        Generator<K> gen;
         AbstractAdapter<K> tree;
         int trueDel, falseDel, trueIns, falseIns, trueFind, falseFind, trueFindVal, falseFindVal, countRQ, sumRQ, trueSnap, falseSnap;
         final Experiment ex;
@@ -468,7 +468,7 @@ public class Main {
             
             // perform operations while experiment's state is running
             while (ex.state == ExperimentState.RUNNING) {
-                final K key = (K) gen.next();
+                final K key = gen.next();
                 final double op = rng.nextNatural() / (double) Integer.MAX_VALUE;
                 if (op < ratio.ins) {
                     if (tree.add(key, rng)) trueIns++;
@@ -479,7 +479,7 @@ public class Main {
                 } else {
                     final double getType = rng.nextNatural() / (double) Integer.MAX_VALUE;
                     if(getType < rangePart) {
-                        final K key2 = (K) gen.next();
+                        final K key2 = gen.next();
                         sumRQ += tree.rangeQuery(min(key, key2), max(key, key2), falseIns, rng);
                         countRQ++;
                         continue;

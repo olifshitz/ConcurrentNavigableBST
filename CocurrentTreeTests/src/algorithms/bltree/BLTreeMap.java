@@ -45,7 +45,8 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
     @Override
     public boolean containsValue(Object value) {
         TreeNodeValue tValue = new TreeNodeValue();
-        this.root.findValue((V)value, null, null, true, tValue);
+        while(!this.root.findValue((V)value, null, null, true, tValue)){}
+        if(!tValue.foundExactly) this.root.unsetChangingRange(null, null, true);
         return tValue.foundExactly;
     }
 
@@ -268,7 +269,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
         return entryIterator(min, max, false);
     }
 
-    private Iterator<Map.Entry<K, V>> entryIterator(K min, K max, boolean allTree) {
+    private Iterator<Map.Entry<K, V>> entryIterator(K min, K max, boolean allTree) {                
         while(!this.root.setChangingRange(min, max, allTree)){}       
         return new RangeIterator(min, max, allTree);
     }
@@ -291,7 +292,12 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             this.allTree = allTree;
             nodeStack = new Stack<>();
             if(allTree) root.unsetChanging();
-            nodeStack.push(root.getChild(root.getDirection(min)));
+            TreeNode firstNode = root.getChild(root.getDirection(min));
+            if(firstNode == null) {
+                hasNext = false;
+                return;
+            }
+            nodeStack.push(firstNode);
             moveNext();
         }
         
@@ -309,11 +315,14 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
 
                 largerThanMin = allTree || current.compareToKey(min) >= 0;
                 smallerThanMax = allTree || current.compareToKey(max) <= 0;
-                if (largerThanMin && current.left != null) {
-                    nodeStack.push(current.left);
+                
+                TreeNode snapLeft = current.left;
+                TreeNode snapRight = current.right;
+                if (largerThanMin && snapLeft != null) {
+                    nodeStack.push(snapLeft);
                 }
-                if (smallerThanMax && current.right != null) {
-                    nodeStack.push(current.right);
+                if (smallerThanMax && snapRight != null) {
+                    nodeStack.push(snapRight);
                 }
             }
             if(largerThanMin && smallerThanMax) {
@@ -478,6 +487,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             long nodeV = this.version;            
             while(true) {
                 boolean largerThanMin, smallerThanMax;
+                TreeNode snapRight, snapLeft;
                 synchronized(this){
                     if(nodeV != version || isDeleted()) return false;
                     largerThanMin = allTree || compareToKey(min) >= 0;
@@ -486,28 +496,38 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                         if(isMarked()) return false;
                         setChanging();                    
                     }
+                    snapRight = this.right;
+                    snapLeft = this.left;
                 }
                 if(largerThanMin && smallerThanMax && this.value == value) {
-                    unsetChanging();
                     tValue.value = value;
                     tValue.foundExactly = true;
+                    unsetChanging();
                     return true;
                 }
-                if (largerThanMin && this.left != null && !tValue.foundExactly) {
-                    if(!this.left.findValue(value, min, max, allTree, tValue)) {
+                if (largerThanMin && snapLeft != null) {
+                    if(!snapLeft.findValue(value, min, max, allTree, tValue)) {
+                        if(largerThanMin && smallerThanMax) unsetChanging();
+                        continue;
+                    }
+                    if(tValue.foundExactly)
+                    {
+                        unsetChanging();
+                        return true;
+                    }
+                }
+                if (smallerThanMax && snapRight != null) {
+                    if(!snapRight.findValue(value, min, max, allTree, tValue)) {
+                        if(largerThanMin && snapLeft != null) snapLeft.unsetChangingRange(min, max, allTree);
                         if(largerThanMin && smallerThanMax) unsetChanging();
                         continue;
                     }
                 }
-                if (smallerThanMax && this.right != null && !tValue.foundExactly) {
-                    if(!this.right.findValue(value, min, max, allTree, tValue)) {
-                        if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                        if(largerThanMin && smallerThanMax) unsetChanging();
-                        continue;
-                    }
+                if(tValue.foundExactly) 
+                {
+                    if(largerThanMin && snapLeft != null) snapLeft.unsetChangingRange(min, max, allTree);
+                    if(largerThanMin && smallerThanMax) unsetChanging();
                 }
-                if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                if(largerThanMin && smallerThanMax) unsetChanging();
                 return true;
             }
         }

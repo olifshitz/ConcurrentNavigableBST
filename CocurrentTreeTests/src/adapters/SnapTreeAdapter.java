@@ -26,6 +26,7 @@ import main.support.Random;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentNavigableMap;
 import algorithms.bronson.snaptree.SnapTreeMap;
+import java.util.ArrayList;
 
 /**
  *
@@ -75,19 +76,15 @@ public class SnapTreeAdapter<K extends Comparable<? super K>> extends AbstractAd
         return tree.size();
     }
 
+    
     @Override
     public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
-        assert rangeSize == main.Globals.DEFAULT_RQ_SIZE;
-        final Object[] result = new Object[rangeSize];
         final ConcurrentNavigableMap map = tree.subMap(lo, true, hi, true);
         final Iterator<K> it = map.keySet().iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            final K next = it.next();
-            if (hi.compareTo(next) < 0) break;
-            result[i++] = next;
-        }
-        return result.length;
+        ArrayList<K> copy = new ArrayList<>();
+        while (it.hasNext())
+            copy.add(it.next());
+        return copy.size();
     }
 
     @Override
