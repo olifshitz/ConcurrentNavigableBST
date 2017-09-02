@@ -419,19 +419,19 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                 }
                 if (largerThanMin && this.left != null && !tValue.foundExactly) {
                     if(!this.left.findValue(value, min, max, allTree, tValue)) {
-                        if(isMarked()) unsetChanging();
+                        if(largerThanMin && smallerThanMax) unsetChanging();
                         continue;
                     }
                 }
                 if (smallerThanMax && this.right != null && !tValue.foundExactly) {
                     if(!this.right.findValue(value, min, max, allTree, tValue)) {
                         if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                        if(isMarked()) unsetChanging();
+                        if(largerThanMin && smallerThanMax) unsetChanging();
                         continue;
                     }
                 }
                 if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                if(isMarked()) unsetChanging();
+                if(largerThanMin && smallerThanMax) unsetChanging();
                 return true;
             }
         }
@@ -452,14 +452,14 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                 }
                 if (largerThanMin && this.left != null) {
                     if(!this.left.setChangingRange(min, max, allTree)) {
-                        unsetChanging();
+                        if(largerThanMin && smallerThanMax) unsetChanging();
                         continue;
                     }
                 }
                 if (smallerThanMax && this.right != null) {
                     if(!this.right.setChangingRange(min, max, allTree)) {
                         if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                        unsetChanging();
+                        if(largerThanMin && smallerThanMax) unsetChanging();
                         continue;
                     }
                 }
