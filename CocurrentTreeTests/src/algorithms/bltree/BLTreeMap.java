@@ -370,7 +370,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                 return true;                
             }
             while(true){
-                if(nodeV != version || isMarked()) return false;
+                if(nodeV != version || isDeleted()) return false;
                 ChildDir dir = getDirection(key);
                 if(dir == ChildDir.This) return false;
                 TreeNode child = this.getChild(dir);
@@ -381,7 +381,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                 }
                 boolean result = child.findClosestNode(key, outNode);
                 if(!result) continue;
-                if(nodeV != version || isMarked()) return false;
+                if(nodeV != version || isDeleted()) return false;
                 if(outNode.parent == null){
                     outNode.setParent(this, nodeV);
                     outNode.dir = dir;
@@ -395,6 +395,7 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             long nodeV = this.version;
             while(true) {
                 boolean largerThanMin, smallerThanMax;
+                TreeNode snapRight, snapLeft;
                 synchronized(this){
                     if(nodeV != version || isDeleted()) return false;
                     largerThanMin = allTree || compareToKey(min) >= 0;
@@ -403,16 +404,18 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                         if(isMarked()) return false;
                         setChanging();                    
                     }
+                    snapRight = this.right;
+                    snapLeft = this.left;
                 }
-                if (largerThanMin && this.left != null) {
-                    if(!this.left.setChangingRange(min, max, allTree)) {
+                if (largerThanMin && snapLeft != null) {
+                    if(!snapLeft.setChangingRange(min, max, allTree)) {
                         unsetChanging();
                         continue;
                     }
                 }
-                if (smallerThanMax && this.right != null) {
-                    if(!this.right.setChangingRange(min, max, allTree)) {
-                        if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
+                if (smallerThanMax && snapRight != null) {
+                    if(!snapRight.setChangingRange(min, max, allTree)) {
+                        if(largerThanMin && snapLeft != null) snapLeft.unsetChangingRange(min, max, allTree);
                         unsetChanging();
                         continue;
                     }
