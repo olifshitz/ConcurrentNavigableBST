@@ -419,19 +419,19 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                 }
                 if (largerThanMin && this.left != null && !tValue.foundExactly) {
                     if(!this.left.findValue(value, min, max, allTree, tValue)) {
-                        unsetChanging();
+                        if(isMarked()) unsetChanging();
                         continue;
                     }
                 }
                 if (smallerThanMax && this.right != null && !tValue.foundExactly) {
                     if(!this.right.findValue(value, min, max, allTree, tValue)) {
                         if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                        unsetChanging();
+                        if(isMarked()) unsetChanging();
                         continue;
                     }
                 }
                 if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
-                unsetChanging();
+                if(isMarked()) unsetChanging();
                 return true;
             }
         }
