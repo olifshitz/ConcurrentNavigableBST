@@ -49,7 +49,7 @@ public abstract class AbstractAdapter<K> {
         return 1<<shift;
     }
 
-    public Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+    public int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
         throw new UnsupportedOperationException("not overloaded");
     }
     public Object partialSnapshot(final int size, final Random rng) {

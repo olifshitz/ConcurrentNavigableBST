@@ -65,8 +65,8 @@ public class LockFreeKSTRQAdapter<K extends Comparable<? super K>> extends Abstr
     }
 
     @Override
-    public Object rangeQuery(K lo, K hi, int rangeSize, Random rng) {
-        return tree.subSet(lo, hi);
+    public int rangeQuery(K lo, K hi, int rangeSize, Random rng) {
+        return tree.subSet(lo, hi).length;
     }
 
     @Override

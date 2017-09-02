@@ -31,12 +31,12 @@ public class BLTreeAdapter<K extends Comparable<K>> extends AbstractAdapter<K> i
     }
 
     @Override
-    public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
-        Iterator<K> iter = tree.keySet(lo, hi).iterator();
+    public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+        Iterator<Map.Entry<K,K>> iter = tree.entryIterator(lo, hi);
         ArrayList<K> copy = new ArrayList<>();
         while (iter.hasNext())
-            copy.add(iter.next());
-        return copy;
+            copy.add(iter.next().getKey());
+        return copy.size();
     }
 
     @Override

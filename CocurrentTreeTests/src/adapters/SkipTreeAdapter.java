@@ -55,7 +55,7 @@ public class SkipTreeAdapter<K> extends AbstractAdapter<K> implements BBSTInterf
     }
 
     @Override
-    public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+    public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
         assert rangeSize == Globals.DEFAULT_RQ_SIZE;
         final Object[] result = new Object[rangeSize];
         final ConcurrentNavigableMap map = tree.subMap(lo, true, hi, true);
@@ -64,7 +64,7 @@ public class SkipTreeAdapter<K> extends AbstractAdapter<K> implements BBSTInterf
         while (it.hasNext()) {
             result[i++] = it.next();
         }
-        return result;
+        return result.length;
     }
 
     @Override
