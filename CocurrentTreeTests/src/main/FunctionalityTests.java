@@ -4,6 +4,7 @@ import algorithms.bltree.BLTreeMap;
 import java.util.*;
 import java.io.*;
 
+
 public class FunctionalityTests {
     static int absentSize;
     static int absentMask;
@@ -395,6 +396,25 @@ public class FunctionalityTests {
         reallyAssert (s.equals(m));
     }
 
+    static void rangeTest(Map<Integer,Integer> s, int size, Integer[] key){
+        reallyAssert(s instanceof BLTreeMap);
+        timer.start("Range test (iterator)  ", size);
+        BLTreeMap tree = (BLTreeMap)s;
+        shuffle(key);
+        
+        Integer min=Math.min(key[0], key[size-1]);
+        Integer max=Math.max(key[0], key[size-1]);
+        
+        int count = 0;
+        for (Iterator<Map.Entry<Integer,Integer>> it = tree.entryIterator(min, max); it.hasNext(); ) {
+            Map.Entry<Integer,Integer> entry = it.next();
+            reallyAssert(entry.getKey().compareTo(max) <= 0);
+            reallyAssert(entry.getKey().compareTo(min) >= 0);
+            ++count;
+        }
+        reallyAssert(count == max - min + 1);
+        timer.finish();
+    }
 
     static void test(Map<Integer,Integer> s, Integer[] key) {
         int size = key.length;
@@ -513,6 +533,15 @@ public class FunctionalityTests {
         s.clear();
         s2.clear();
         timer.finish();
+        
+        t3("Put (absent)           ", size, s, key, size);
+        rangeTest(s,size,key);
+        
+        timer.start("Clear                  ", size);
+        s.clear();
+        s2.clear();
+        timer.finish();
+        
         reallyAssert (s2.isEmpty() && s.isEmpty());
     }
 
