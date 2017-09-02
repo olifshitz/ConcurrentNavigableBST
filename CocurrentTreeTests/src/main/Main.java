@@ -213,7 +213,7 @@ public class Main {
     @Exclude
     protected static class SyncTreeMapFactory<K> extends TreeFactory<K> {
         public BBSTInterface<K> newTree(final Object param) {
-            return new TreeMapAdapter();
+            return new SyncTreeMapAdapter<>();
         }
         public String getName() { return "SyncTMAP"; }
     }
@@ -821,7 +821,7 @@ public class Main {
         }
         @Override
         public String toString() {
-            return alg + param + "-" + nprocs + "thr-" + maxkey + "keys-" + ratio + "-" + rangePart + "r-" + (factory == null ? "null" : factory.getName());
+            return alg + param + "-" + nprocs + "thr-" + maxkey + "keys-" + rangeSize + "rangeSize-" + ratio + "-" + rangePart + "r-" + (factory == null ? "null" : factory.getName());
         }
     }
 
