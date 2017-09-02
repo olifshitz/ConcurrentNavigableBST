@@ -399,17 +399,20 @@ public class FunctionalityTests {
     static void rangeTest(Map<Integer,Integer> s, int size, Integer[] key){
         reallyAssert(s instanceof BLTreeMap);
         timer.start("Range test (iterator)  ", size);
-        int sum = 0;
         BLTreeMap tree = (BLTreeMap)s;
-        Arrays.sort(key);
-        Set<Integer> entries = tree.keySet(key[0], key[size -1]);
-        for (Iterator it = entries.iterator(); it.hasNext(); ) {
-            Object entry = it.next();
-            if(tree.get(entry) != null)
-                sum++;
-        }
+        shuffle(key);
         
-        reallyAssert(sum == size);
+        Integer min=Math.min(key[0], key[size-1]);
+        Integer max=Math.max(key[0], key[size-1]);
+        
+        int count = 0;
+        for (Iterator<Map.Entry<Integer,Integer>> it = tree.entryIterator(min, max); it.hasNext(); ) {
+            Map.Entry<Integer,Integer> entry = it.next();
+            reallyAssert(entry.getKey().compareTo(max) <= 0);
+            reallyAssert(entry.getKey().compareTo(min) >= 0);
+            ++count;
+        }
+        reallyAssert(count == max - min + 1);
         timer.finish();
     }
 
