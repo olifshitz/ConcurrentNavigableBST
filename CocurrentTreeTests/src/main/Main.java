@@ -782,20 +782,22 @@ public class Main {
         final String alg, param;
         final int nprocs, maxkey;
         final Ratio ratio;
+        final double rangePart;
         final GeneratorFactory factory;
         int throughput; // exists to make access to this convenient so that we can decide whether we have finished warming up
 
-        public Experiment(final String alg, final String param, final int nprocs, final int maxkey, final Ratio ratio, final GeneratorFactory factory) {
+        public Experiment(final String alg, final String param, final int nprocs, final int maxkey, final Ratio ratio, final double rangePart, final GeneratorFactory factory) {
             this.alg = alg;
             this.param = param;
             this.nprocs = nprocs;
             this.maxkey = maxkey;
             this.ratio = ratio;
+            this.rangePart = rangePart;
             this.factory = factory;
         }
         @Override
         public String toString() {
-            return alg + param + "-" + nprocs + "thr-" + maxkey + "keys-" + ratio + (factory == null ? "null" : factory.getName());
+            return alg + param + "-" + nprocs + "thr-" + maxkey + "keys-" + ratio + "-" + rangePart + "r-" + (factory == null ? "null" : factory.getName());
         }
     }
 
@@ -925,7 +927,7 @@ public class Main {
             System.out.println("Critical error with generator selection...");
             System.exit(-1);
         }
-        exp.add(new Experiment(alg, treeParam.toString(), nthreads, (int) switches.get("keyRange"), ratio, gen));
+        exp.add(new Experiment(alg, treeParam.toString(), nthreads, (int) switches.get("keyRange"), ratio, rangePart, gen));
         return exp;
     }
     
