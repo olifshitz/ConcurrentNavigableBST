@@ -2,3 +2,4 @@
 /CocurrentTreeTests/dist
 /CocurrentTreeTests/nbproject/private
 *.csv_stdout
+.DS_Store
