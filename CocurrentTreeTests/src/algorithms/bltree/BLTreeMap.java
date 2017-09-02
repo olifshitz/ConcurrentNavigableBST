@@ -44,7 +44,9 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
 
     @Override
     public boolean containsValue(Object value) {
-        return values().contains((V)value);
+        TreeNodeValue tValue = new TreeNodeValue();
+        this.root.findValue((V)value, null, null, true, tValue);
+        return tValue.foundExactly;
     }
 
     private TreeNode getNode(K key) {
@@ -259,6 +261,11 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
         }
     }
     
+    private class TreeNodeValue {
+        public boolean foundExactly;
+        public V value;
+    };
+    
     private class TreeNodeVersion {
         public boolean foundExactly;
         
@@ -390,6 +397,47 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
             }
         }
 
+        private boolean findValue(V value, K min, K max, boolean allTree, TreeNodeValue tValue)
+        {
+            long nodeV = this.version;            
+            while(true) {
+                boolean largerThanMin, smallerThanMax;
+                synchronized(this){
+                    if(nodeV != version || isDeleted()) return false;
+                    largerThanMin = allTree || compareToKey(min) >= 0;
+                    smallerThanMax = allTree || compareToKey(max) <= 0;
+                    if(largerThanMin && smallerThanMax) {                    
+                        if(isMarked()) return false;
+                        setChanging();                    
+                    }
+                }
+                if(this.value == value)
+                {
+                    unsetChanging();
+                    tValue.value = value;
+                    tValue.foundExactly = true;
+                    return true;
+                }
+                
+                if (largerThanMin && this.left != null) {
+                    if(!this.left.findValue(value, min, max, allTree, tValue)) {
+                        unsetChanging();
+                        continue;
+                    }
+                }
+                if (smallerThanMax && this.right != null) {
+                    if(!this.right.findValue(value, min, max, allTree, tValue)) {
+                        if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
+                        unsetChanging();
+                        continue;
+                    }
+                }
+                if(largerThanMin && this.left != null) this.left.unsetChangingRange(min, max, allTree);
+                unsetChanging();
+                return true;
+            }
+        }
+        
         private boolean setChangingRange(K min, K max, boolean allTree)
         {
             long nodeV = this.version;
