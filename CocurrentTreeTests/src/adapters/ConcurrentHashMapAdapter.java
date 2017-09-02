@@ -51,7 +51,7 @@ public class ConcurrentHashMapAdapter<K> extends AbstractAdapter<K> implements B
     }
 
     @Override
-    public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+    public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
 //        assert rangeSize == Debug.QUERY_SIZE;
 //        final Object[] result = new Object[rangeSize];
 //        final ConcurrentNavigableMap map = tree.subMap(lo, true, hi, true);
@@ -60,7 +60,7 @@ public class ConcurrentHashMapAdapter<K> extends AbstractAdapter<K> implements B
 //        while (it.hasNext()) {
 //            result[i++] = it.next();
 //        }
-        return null;//result;
+        return 0;//result;
     }
 
     @Override

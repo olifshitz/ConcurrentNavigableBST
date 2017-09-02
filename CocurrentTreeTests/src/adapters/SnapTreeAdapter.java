@@ -76,7 +76,7 @@ public class SnapTreeAdapter<K extends Comparable<? super K>> extends AbstractAd
     }
 
     @Override
-    public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+    public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
         assert rangeSize == main.Globals.DEFAULT_RQ_SIZE;
         final Object[] result = new Object[rangeSize];
         final ConcurrentNavigableMap map = tree.subMap(lo, true, hi, true);
@@ -87,14 +87,7 @@ public class SnapTreeAdapter<K extends Comparable<? super K>> extends AbstractAd
             if (hi.compareTo(next) < 0) break;
             result[i++] = next;
         }
-//        if (it.hasNext()) {
-//            for (int j=0;j<rangeSize;j++) System.out.print(" " + ((Integer)result[j]));
-//            System.out.println();
-//            System.out.println("lo="+((Integer)(Object)lo) + " hi=" + ((Integer)(Object)hi) + " i=" + i + " rangeSize=" + rangeSize + " next=" + it.next());
-//            System.out.println("ERROR in snap tree's range query");
-//            System.exit(-1);
-//        }
-        return result;
+        return result.length;
     }
 
     @Override

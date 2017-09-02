@@ -400,7 +400,7 @@ public class Main {
         CyclicBarrier start;
         Generator<Integer> gen;
         AbstractAdapter<K> tree;
-        int trueDel, falseDel, trueIns, falseIns, trueFind, falseFind, trueRQ, falseRQ, trueSnap, falseSnap;
+        int trueDel, falseDel, trueIns, falseIns, trueFind, falseFind, countRQ, sumRQ, trueSnap, falseSnap;
         final Experiment ex;
         Random rng;
 
@@ -478,8 +478,8 @@ public class Main {
                     final double getType = rng.nextNatural() / (double) Integer.MAX_VALUE;
                     if(getType < rangePart) {
                         final K key2 = (K) gen.next();
-                        tree.rangeQuery(min(key, key2), max(key, key2), falseIns, rng);
-                        trueRQ++;
+                        sumRQ += tree.rangeQuery(min(key, key2), max(key, key2), falseIns, rng);
+                        countRQ++;
                         continue;
                     }
                     if (tree.contains(key)) trueFind++;
@@ -512,8 +512,8 @@ public class Main {
         public int getFalseDel() { return falseDel; }
         public int getTrueFind() { return trueFind; }
         public int getFalseFind() { return falseFind; }
-        public int getTrueRQ() { return trueRQ; }
-        public int getFalseRQ() { return falseRQ; }
+        public int getTrueRQ() { return countRQ; }
+        public int getFalseRQ() { return sumRQ; }
         public int getTrueSnap() { return trueSnap; }
         public int getFalseSnap() { return falseSnap; }
         public long getStartTime() { return myStartWallTime; }

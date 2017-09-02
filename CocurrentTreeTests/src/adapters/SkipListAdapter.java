@@ -55,13 +55,13 @@ public class SkipListAdapter<K> extends AbstractAdapter<K> implements BBSTInterf
     }
 
     @Override    
-    public final Object rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
+    public final int rangeQuery(final K lo, final K hi, final int rangeSize, final Random rng) {
         final ConcurrentNavigableMap map = tree.subMap(lo, true, hi, true);
         final Iterator<K> it = map.keySet().iterator();
         ArrayList<K> copy = new ArrayList<>();
         while (it.hasNext())
             copy.add(it.next());
-        return copy;
+        return copy.size();
     }
 
     @Override
