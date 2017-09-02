@@ -295,26 +295,29 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
         
         private void moveNext(){
             boolean largerThanMin = false, smallerThanMax = false;
+            
+            if(next != null) next.unsetChanging();
+            
             hasNext = false;
             next = null;            
             
             TreeNode current = null;
             while(!nodeStack.isEmpty() && !(largerThanMin && smallerThanMax)){
-            current = nodeStack.pop();
-            
-            largerThanMin = allTree || current.compareToKey(min) >= 0;
-            smallerThanMax = allTree || current.compareToKey(max) <= 0;
-            if (largerThanMin && current.left != null) {
-                nodeStack.push(current.left);
-            }
-            if (smallerThanMax && current.right != null) {
-                nodeStack.push(current.right);
-            }
+                current = nodeStack.pop();
+
+                largerThanMin = allTree || current.compareToKey(min) >= 0;
+                smallerThanMax = allTree || current.compareToKey(max) <= 0;
+                if (largerThanMin && current.left != null) {
+                    nodeStack.push(current.left);
+                }
+                if (smallerThanMax && current.right != null) {
+                    nodeStack.push(current.right);
+                }
             }
             if(largerThanMin && smallerThanMax) {
                 hasNext = true;
                 next = current;
-            }            
+            }        
         }
 
         @Override
