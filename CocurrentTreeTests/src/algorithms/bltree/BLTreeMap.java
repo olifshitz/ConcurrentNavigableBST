@@ -411,14 +411,12 @@ public class BLTreeMap<K extends Comparable<K>,V> implements Map<K,V> {
                         setChanging();                    
                     }
                 }
-                if(this.value == value)
-                {
+                if(largerThanMin && smallerThanMax && this.value == value) {
                     unsetChanging();
                     tValue.value = value;
                     tValue.foundExactly = true;
                     return true;
                 }
-                
                 if (largerThanMin && this.left != null && !tValue.foundExactly) {
                     if(!this.left.findValue(value, min, max, allTree, tValue)) {
                         unsetChanging();
