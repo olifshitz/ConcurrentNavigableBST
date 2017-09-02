@@ -13,19 +13,23 @@ import org.deuce.transform.Exclude;
 public class BLTreeAdapter<K extends Comparable<K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
     final BLTreeMap<K,K> tree = new BLTreeMap<>();
 
+    @Override
     public final boolean contains(final K key) {
         return tree.containsKey(key);
     }
     
+    @Override
     public final boolean add(final K key, final Random rng) {
         tree.put(key, key);
         return true;
     }
 
+    @Override
     public final K get(final K key) {
         return tree.get(key);
     }
 
+    @Override
     public final boolean remove(final K key, final Random rng) {
         return tree.remove(key) != null;
     }
